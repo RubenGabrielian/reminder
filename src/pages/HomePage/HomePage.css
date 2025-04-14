@@ -248,10 +248,10 @@
 }
 
 .reminder-card__datetime {
-    color: var(--text-secondary);
     display: flex;
     gap: 12px;
     font-size: 14px;
+    color: var(--text-secondary);
 }
 
 .reminder-card__date,
@@ -309,4 +309,36 @@ body.dark .bottom-nav__button {
 /* Update LoadingSpinner text color */
 .loading-spinner__text {
     color: var(--text-secondary);
+}
+
+.reminder-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reminder-card__delete {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: #ff3b30;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateX(10px);
+    border-radius: 8px;
+}
+
+.reminder-card:hover .reminder-card__delete {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reminder-card__delete:hover {
+    background-color: rgba(255, 59, 48, 0.1);
+}
+
+.reminder-card__delete svg {
+    width: 20px;
+    height: 20px;
 }

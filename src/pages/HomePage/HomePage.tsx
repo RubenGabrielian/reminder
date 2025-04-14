@@ -8,6 +8,7 @@ import { isMiniAppDark, useSignal } from '@telegram-apps/sdk-react';
 import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
+import { ConfirmModal } from '@/components/ConfirmModal/ConfirmModal';
 import './HomePage.css';
 
 interface Reminder {
@@ -23,6 +24,7 @@ export const HomePage: FC = () => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const isDark = useSignal(isMiniAppDark);
+  const [deleteReminder, setDeleteReminder] = useState<Reminder | null>(null);
 
   useEffect(() => {
     // Add theme class to body
@@ -47,6 +49,24 @@ export const HomePage: FC = () => {
 
   const handleSaveReminder = (reminder: Reminder) => {
     setReminders(prev => [...prev, reminder]);
+  };
+
+  const handleDeleteClick = (reminder: Reminder) => {
+    setDeleteReminder(reminder);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteReminder) return;
+
+    try {
+      const updatedReminders = reminders.filter(r => r.id !== deleteReminder.id);
+      await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
+      setReminders(updatedReminders);
+    } catch (error) {
+      console.error('Failed to delete reminder:', error);
+    } finally {
+      setDeleteReminder(null);
+    }
   };
 
   return (
@@ -122,9 +142,20 @@ export const HomePage: FC = () => {
               <div key={reminder.id} className="reminder-card">
                 <div className="reminder-card__content">
                   <p className="reminder-card__text">{reminder.text}</p>
-                  <div className="reminder-card__datetime">
-                    <time className="reminder-card__date">{reminder.date}</time>
-                    <time className="reminder-card__time">{reminder.time}</time>
+                  <div className="reminder-card__footer">
+                    <div className="reminder-card__datetime">
+                      <time className="reminder-card__date">{reminder.date}</time>
+                      <time className="reminder-card__time">{reminder.time}</time>
+                    </div>
+                    <button 
+                      className="reminder-card__delete"
+                      onClick={() => handleDeleteClick(reminder)}
+                      aria-label="Delete reminder"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -158,6 +189,15 @@ export const HomePage: FC = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSave={handleSaveReminder}
+        />
+
+        {/* Confirm Delete Modal */}
+        <ConfirmModal
+          isOpen={!!deleteReminder}
+          onClose={() => setDeleteReminder(null)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Reminder"
+          message="Are you sure you want to delete this reminder? This action cannot be undone."
         />
       </div>
     </Page>
