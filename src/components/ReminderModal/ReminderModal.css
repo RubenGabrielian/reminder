@@ -1,0 +1,125 @@
+.reminder-modal {
+    --modal-width: 90%;
+    --modal-max-width: 400px;
+    --modal-padding: 20px;
+    --input-border-radius: 12px;
+    --primary-color: #0098ea;
+    --error-color: #ff3b30;
+    --background-color: #ffffff;
+    --text-color: #1f1f1f;
+    --border-color: #e1e1e1;
+}
+
+.reminder-modal__form {
+    width: var(--modal-width);
+    max-width: var(--modal-max-width);
+    padding: var(--modal-padding);
+    background: var(--background-color);
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.reminder-modal__title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 24px;
+    text-align: center;
+}
+
+.reminder-modal__input-group {
+    margin-bottom: 20px;
+}
+
+.reminder-modal__textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--input-border-radius);
+    font-size: 16px;
+    resize: none;
+    transition: border-color 0.3s ease;
+}
+
+.reminder-modal__textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.reminder-modal__datetime {
+    display: flex;
+    gap: 16px;
+}
+
+.reminder-modal__date,
+.reminder-modal__time {
+    flex: 1;
+}
+
+.reminder-modal__date label,
+.reminder-modal__time label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.reminder-modal__input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--input-border-radius);
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.reminder-modal__input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.reminder-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.reminder-modal__button {
+    padding: 12px 24px;
+    border-radius: var(--input-border-radius);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reminder-modal__button--cancel {
+    background: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+}
+
+.reminder-modal__button--cancel:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.reminder-modal__button--save {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.reminder-modal__button--save:hover {
+    background: #0084cc;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .reminder-modal {
+        --background-color: #1f1f1f;
+        --text-color: #ffffff;
+        --border-color: #2c2c2c;
+    }
+}

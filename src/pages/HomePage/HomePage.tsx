@@ -2,10 +2,19 @@ import {
   Title,
 } from '@telegram-apps/telegram-ui';
 import type { FC } from 'react';
+import { useState } from 'react';
 import { Page } from '@/components/Page.tsx';
+import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import './HomePage.css';
 
 export const HomePage: FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSaveReminder = (reminder: { text: string; date: string; time: string }) => {
+    // TODO: Implement saving reminder
+    console.log('Saving reminder:', reminder);
+  };
+
   return (
     <Page back={false}>
       <div className="home-page">
@@ -85,11 +94,18 @@ export const HomePage: FC = () => {
         </nav>
 
         {/* FAB Button */}
-        <button className="fab">
+        <button className="fab" onClick={() => setIsModalOpen(true)}>
           <svg className="fab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
         </button>
+
+        {/* Reminder Modal */}
+        <ReminderModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveReminder}
+        />
       </div>
     </Page>
   );
