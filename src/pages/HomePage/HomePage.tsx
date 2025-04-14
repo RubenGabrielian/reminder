@@ -3,8 +3,7 @@ import {
 } from '@telegram-apps/telegram-ui';
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
-import { cloudStorage } from '@telegram-apps/sdk-react';
-import { isMiniAppDark, useSignal } from '@telegram-apps/sdk-react';
+import { cloudStorage, isMiniAppDark, useSignal } from '@telegram-apps/sdk-react';
 import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
@@ -33,13 +32,24 @@ export const HomePage: FC = () => {
   }, [isDark]);
 
   useEffect(() => {
-    // For local testing, use mock data
     const loadReminders = async () => {
       try {
-        // For local testing, use mock data
-        setReminders(mockReminders);
+        setIsLoading(true);
+        // Try to get user data from cloudStorage
+        const userData = await cloudStorage.getItem('user');
+        
+        if (userData) {
+          // User found, load reminders from cloudStorage
+          const data = await cloudStorage.getItem('reminders') || '[]';
+          setReminders(JSON.parse(data));
+        } else {
+          // No user found, use mock data
+          setReminders(mockReminders);
+        }
       } catch (error) {
         console.error('Failed to load reminders:', error);
+        // Fallback to mock data if there's an error
+        setReminders(mockReminders);
       } finally {
         setIsLoading(false);
       }
@@ -50,7 +60,18 @@ export const HomePage: FC = () => {
 
   const handleSaveReminder = async (reminder: Reminder) => {
     try {
-      // For local testing, add to state directly
+      // Try to get user data from cloudStorage
+      const userData = await cloudStorage.getItem('user');
+      
+      if (userData) {
+        // User found, save to cloudStorage
+        const existingData = await cloudStorage.getItem('reminders') || '[]';
+        const reminders = JSON.parse(existingData);
+        reminders.push(reminder);
+        await cloudStorage.setItem('reminders', JSON.stringify(reminders));
+      }
+      
+      // Update state in both cases
       setReminders(prev => [...prev, reminder]);
     } catch (error) {
       console.error('Failed to save reminder:', error);
@@ -61,7 +82,16 @@ export const HomePage: FC = () => {
     if (!reminderToDelete) return;
 
     try {
-      // For local testing, remove from state directly
+      // Try to get user data from cloudStorage
+      const userData = await cloudStorage.getItem('user');
+      
+      if (userData) {
+        // User found, update cloudStorage
+        const updatedReminders = reminders.filter(r => r.id !== reminderToDelete.id);
+        await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
+      }
+      
+      // Update state in both cases
       setReminders(prev => prev.filter(r => r.id !== reminderToDelete.id));
       setReminderToDelete(null);
     } catch (error) {
