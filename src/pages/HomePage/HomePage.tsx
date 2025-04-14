@@ -2,7 +2,7 @@ import {
   Title,
 } from '@telegram-apps/telegram-ui';
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { cloudStorage, isMiniAppDark, useSignal } from '@telegram-apps/sdk-react';
 import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
@@ -10,6 +10,17 @@ import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
 import { ConfirmModal } from '@/components/ConfirmModal/ConfirmModal';
 import { mockReminders } from '@/mocks/reminders';
 import './HomePage.css';
+
+// Add Telegram WebApp type declaration
+declare global {
+  interface Window {
+    Telegram: {
+      WebApp: {
+        showAlert: (message: string) => void;
+      };
+    };
+  }
+}
 
 interface Reminder {
   id: string;
@@ -25,31 +36,94 @@ export const HomePage: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isDark = useSignal(isMiniAppDark);
   const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null);
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
+  const [notifiedReminders, setNotifiedReminders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Add theme class to body
     document.body.className = isDark ? 'dark' : 'light';
   }, [isDark]);
 
+  const checkReminders = useCallback(async () => {
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    const currentDate = now.toISOString().split('T')[0];
+
+    reminders.forEach(async (reminder) => {
+      if (reminder.date === currentDate && reminder.time === currentTime) {
+        // Check if we've already notified for this reminder
+        if (!notifiedReminders.has(reminder.id)) {
+          // Show notification using Telegram's notification system
+          window.Telegram.WebApp.showAlert(reminder.text);
+
+          // Mark as notified
+          setNotifiedReminders(prev => {
+            const newSet = new Set(prev);
+            newSet.add(reminder.id);
+            return newSet;
+          });
+
+          // If using cloudStorage, mark as notified there too
+          if (!isUsingMockData) {
+            try {
+              const existingData = await cloudStorage.getItem('notifiedReminders') || '[]';
+              const notifiedIds = JSON.parse(existingData);
+              notifiedIds.push(reminder.id);
+              await cloudStorage.setItem('notifiedReminders', JSON.stringify(notifiedIds));
+            } catch (error) {
+              console.error('Failed to save notified reminder:', error);
+            }
+          }
+        }
+      }
+    });
+  }, [reminders, notifiedReminders, isUsingMockData]);
+
+  useEffect(() => {
+    // Load notified reminders from cloudStorage
+    const loadNotifiedReminders = async () => {
+      if (!isUsingMockData) {
+        try {
+          const data = await cloudStorage.getItem('notifiedReminders') || '[]';
+          const notifiedIds = JSON.parse(data);
+          setNotifiedReminders(new Set(notifiedIds));
+        } catch (error) {
+          console.error('Failed to load notified reminders:', error);
+        }
+      }
+    };
+
+    loadNotifiedReminders();
+  }, [isUsingMockData]);
+
+  useEffect(() => {
+    // Set up interval to check reminders every minute
+    const intervalId = setInterval(checkReminders, 60000);
+    
+    // Initial check
+    checkReminders();
+
+    return () => clearInterval(intervalId);
+  }, [checkReminders]);
+
   useEffect(() => {
     const loadReminders = async () => {
       try {
         setIsLoading(true);
-        // Try to get user data from cloudStorage
         const userData = await cloudStorage.getItem('user');
         
         if (userData) {
-          // User found, load reminders from cloudStorage
           const data = await cloudStorage.getItem('reminders') || '[]';
           setReminders(JSON.parse(data));
+          setIsUsingMockData(false);
         } else {
-          // No user found, use mock data
           setReminders(mockReminders);
+          setIsUsingMockData(true);
         }
       } catch (error) {
         console.error('Failed to load reminders:', error);
-        // Fallback to mock data if there's an error
         setReminders(mockReminders);
+        setIsUsingMockData(true);
       } finally {
         setIsLoading(false);
       }
@@ -60,18 +134,15 @@ export const HomePage: FC = () => {
 
   const handleSaveReminder = async (reminder: Reminder) => {
     try {
-      // Try to get user data from cloudStorage
-      const userData = await cloudStorage.getItem('user');
-      
-      if (userData) {
-        // User found, save to cloudStorage
+      if (!isUsingMockData) {
+        // Save to cloudStorage if using real data
         const existingData = await cloudStorage.getItem('reminders') || '[]';
         const reminders = JSON.parse(existingData);
         reminders.push(reminder);
         await cloudStorage.setItem('reminders', JSON.stringify(reminders));
       }
       
-      // Update state in both cases
+      // Update state
       setReminders(prev => [...prev, reminder]);
     } catch (error) {
       console.error('Failed to save reminder:', error);
@@ -82,16 +153,13 @@ export const HomePage: FC = () => {
     if (!reminderToDelete) return;
 
     try {
-      // Try to get user data from cloudStorage
-      const userData = await cloudStorage.getItem('user');
-      
-      if (userData) {
-        // User found, update cloudStorage
+      if (!isUsingMockData) {
+        // Update cloudStorage if using real data
         const updatedReminders = reminders.filter(r => r.id !== reminderToDelete.id);
         await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
       }
       
-      // Update state in both cases
+      // Update state
       setReminders(prev => prev.filter(r => r.id !== reminderToDelete.id));
       setReminderToDelete(null);
     } catch (error) {
