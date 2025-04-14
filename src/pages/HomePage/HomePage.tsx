@@ -9,6 +9,7 @@ import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
 import { ConfirmModal } from '@/components/ConfirmModal/ConfirmModal';
+import { mockReminders } from '@/mocks/reminders';
 import './HomePage.css';
 
 interface Reminder {
@@ -22,9 +23,9 @@ interface Reminder {
 export const HomePage: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const isDark = useSignal(isMiniAppDark);
-  const [deleteReminder, setDeleteReminder] = useState<Reminder | null>(null);
+  const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null);
 
   useEffect(() => {
     // Add theme class to body
@@ -32,40 +33,39 @@ export const HomePage: FC = () => {
   }, [isDark]);
 
   useEffect(() => {
+    // For local testing, use mock data
+    const loadReminders = async () => {
+      try {
+        // For local testing, use mock data
+        setReminders(mockReminders);
+      } catch (error) {
+        console.error('Failed to load reminders:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadReminders();
   }, []);
 
-  const loadReminders = async () => {
+  const handleSaveReminder = async (reminder: Reminder) => {
     try {
-      setLoading(true);
-      const data = await cloudStorage.getItem('reminders') || '[]';
-      setReminders(JSON.parse(data));
+      // For local testing, add to state directly
+      setReminders(prev => [...prev, reminder]);
     } catch (error) {
-      console.error('Failed to load reminders:', error);
-    } finally {
-      setLoading(false);
+      console.error('Failed to save reminder:', error);
     }
   };
 
-  const handleSaveReminder = (reminder: Reminder) => {
-    setReminders(prev => [...prev, reminder]);
-  };
-
-  const handleDeleteClick = (reminder: Reminder) => {
-    setDeleteReminder(reminder);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!deleteReminder) return;
+  const handleDeleteReminder = async () => {
+    if (!reminderToDelete) return;
 
     try {
-      const updatedReminders = reminders.filter(r => r.id !== deleteReminder.id);
-      await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
-      setReminders(updatedReminders);
+      // For local testing, remove from state directly
+      setReminders(prev => prev.filter(r => r.id !== reminderToDelete.id));
+      setReminderToDelete(null);
     } catch (error) {
       console.error('Failed to delete reminder:', error);
-    } finally {
-      setDeleteReminder(null);
     }
   };
 
@@ -79,7 +79,7 @@ export const HomePage: FC = () => {
           </Title>
         </header>
 
-        {loading ? (
+        {isLoading ? (
           <LoadingSpinner />
         ) : reminders.length === 0 ? (
           // Empty State
@@ -149,7 +149,7 @@ export const HomePage: FC = () => {
                     </div>
                     <button 
                       className="reminder-card__delete"
-                      onClick={() => handleDeleteClick(reminder)}
+                      onClick={() => setReminderToDelete(reminder)}
                       aria-label="Delete reminder"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -193,9 +193,9 @@ export const HomePage: FC = () => {
 
         {/* Confirm Delete Modal */}
         <ConfirmModal
-          isOpen={!!deleteReminder}
-          onClose={() => setDeleteReminder(null)}
-          onConfirm={handleDeleteConfirm}
+          isOpen={!!reminderToDelete}
+          onClose={() => setReminderToDelete(null)}
+          onConfirm={handleDeleteReminder}
           title="Delete Reminder"
           message="Are you sure you want to delete this reminder? This action cannot be undone."
         />
