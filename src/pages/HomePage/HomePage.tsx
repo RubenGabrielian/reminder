@@ -4,6 +4,7 @@ import {
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { cloudStorage } from '@telegram-apps/sdk-react';
+import { isMiniAppDark, useSignal } from '@telegram-apps/sdk-react';
 import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
@@ -21,6 +22,12 @@ export const HomePage: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
+  const isDark = useSignal(isMiniAppDark);
+
+  useEffect(() => {
+    // Add theme class to body
+    document.body.className = isDark ? 'dark' : 'light';
+  }, [isDark]);
 
   useEffect(() => {
     loadReminders();

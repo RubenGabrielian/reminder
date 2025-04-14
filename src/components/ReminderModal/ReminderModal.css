@@ -54,11 +54,13 @@
 .reminder-modal__datetime {
     display: flex;
     gap: 16px;
+    width: 100%;
 }
 
 .reminder-modal__date,
 .reminder-modal__time {
     flex: 1;
+    width: 100%;
 }
 
 .reminder-modal__date label,
@@ -68,6 +70,7 @@
     font-size: 14px;
     color: var(--text-secondary);
     font-weight: 500;
+    width: 100%;
 }
 
 .reminder-modal__input {
@@ -79,6 +82,36 @@
     transition: border-color 0.3s ease;
     background: var(--background-primary);
     color: var(--text-primary);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Style the date and time input icons */
+input[type="date"].reminder-modal__input,
+input[type="time"].reminder-modal__input {
+    position: relative;
+    padding-right: 40px;
+    /* Space for the calendar/clock icon */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+}
+
+input[type="time"].reminder-modal__input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
+}
+
+/* Remove default calendar/time picker icon */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
 }
 
 .reminder-modal__input:focus {
