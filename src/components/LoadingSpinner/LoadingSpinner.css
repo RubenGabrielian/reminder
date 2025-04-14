@@ -1,0 +1,41 @@
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 24px;
+}
+
+.loading-spinner__circle {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #fcd34d;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.loading-spinner__text {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .loading-spinner__text {
+        color: #999;
+    }
+}

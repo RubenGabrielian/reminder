@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { cloudStorage } from '@telegram-apps/sdk-react';
 import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
+import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
 import './HomePage.css';
 
 interface Reminder {
@@ -27,6 +28,7 @@ export const HomePage: FC = () => {
 
   const loadReminders = async () => {
     try {
+      setLoading(true);
       const data = await cloudStorage.getItem('reminders') || '[]';
       setReminders(JSON.parse(data));
     } catch (error) {
@@ -51,7 +53,7 @@ export const HomePage: FC = () => {
         </header>
 
         {loading ? (
-          <div className="home-page__loading">Loading reminders...</div>
+          <LoadingSpinner />
         ) : reminders.length === 0 ? (
           // Empty State
           <div className="home-page__empty-state">
