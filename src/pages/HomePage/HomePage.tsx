@@ -8,7 +8,6 @@ import { Page } from '@/components/Page.tsx';
 import { ReminderModal } from '@/components/ReminderModal/ReminderModal';
 import { LoadingSpinner } from '@/components/LoadingSpinner/LoadingSpinner';
 import { ConfirmModal } from '@/components/ConfirmModal/ConfirmModal';
-import { mockReminders } from '@/mocks/reminders';
 import './HomePage.css';
 
 // Add Telegram WebApp type declaration
@@ -36,7 +35,6 @@ export const HomePage: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isDark = useSignal(isMiniAppDark);
   const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null);
-  const [isUsingMockData, setIsUsingMockData] = useState(false);
   const [notifiedReminders, setNotifiedReminders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -63,38 +61,34 @@ export const HomePage: FC = () => {
             return newSet;
           });
 
-          // If using cloudStorage, mark as notified there too
-          if (!isUsingMockData) {
-            try {
-              const existingData = await cloudStorage.getItem('notifiedReminders') || '[]';
-              const notifiedIds = JSON.parse(existingData);
-              notifiedIds.push(reminder.id);
-              await cloudStorage.setItem('notifiedReminders', JSON.stringify(notifiedIds));
-            } catch (error) {
-              console.error('Failed to save notified reminder:', error);
-            }
+          // Save notified reminder to cloudStorage
+          try {
+            const existingData = await cloudStorage.getItem('notifiedReminders') || '[]';
+            const notifiedIds = JSON.parse(existingData);
+            notifiedIds.push(reminder.id);
+            await cloudStorage.setItem('notifiedReminders', JSON.stringify(notifiedIds));
+          } catch (error) {
+            console.error('Failed to save notified reminder:', error);
           }
         }
       }
     });
-  }, [reminders, notifiedReminders, isUsingMockData]);
+  }, [reminders, notifiedReminders]);
 
   useEffect(() => {
     // Load notified reminders from cloudStorage
     const loadNotifiedReminders = async () => {
-      if (!isUsingMockData) {
-        try {
-          const data = await cloudStorage.getItem('notifiedReminders') || '[]';
-          const notifiedIds = JSON.parse(data);
-          setNotifiedReminders(new Set(notifiedIds));
-        } catch (error) {
-          console.error('Failed to load notified reminders:', error);
-        }
+      try {
+        const data = await cloudStorage.getItem('notifiedReminders') || '[]';
+        const notifiedIds = JSON.parse(data);
+        setNotifiedReminders(new Set(notifiedIds));
+      } catch (error) {
+        console.error('Failed to load notified reminders:', error);
       }
     };
 
     loadNotifiedReminders();
-  }, [isUsingMockData]);
+  }, []);
 
   useEffect(() => {
     // Set up interval to check reminders every minute
@@ -110,20 +104,11 @@ export const HomePage: FC = () => {
     const loadReminders = async () => {
       try {
         setIsLoading(true);
-        const userData = await cloudStorage.getItem('user');
-        
-        if (userData) {
-          const data = await cloudStorage.getItem('reminders') || '[]';
-          setReminders(JSON.parse(data));
-          setIsUsingMockData(false);
-        } else {
-          setReminders(mockReminders);
-          setIsUsingMockData(true);
-        }
+        const data = await cloudStorage.getItem('reminders') || '[]';
+        setReminders(JSON.parse(data));
       } catch (error) {
         console.error('Failed to load reminders:', error);
-        setReminders(mockReminders);
-        setIsUsingMockData(true);
+        setReminders([]);
       } finally {
         setIsLoading(false);
       }
@@ -134,13 +119,11 @@ export const HomePage: FC = () => {
 
   const handleSaveReminder = async (reminder: Reminder) => {
     try {
-      if (!isUsingMockData) {
-        // Save to cloudStorage if using real data
-        const existingData = await cloudStorage.getItem('reminders') || '[]';
-        const reminders = JSON.parse(existingData);
-        reminders.push(reminder);
-        await cloudStorage.setItem('reminders', JSON.stringify(reminders));
-      }
+      // Save to cloudStorage
+      const existingData = await cloudStorage.getItem('reminders') || '[]';
+      const reminders = JSON.parse(existingData);
+      reminders.push(reminder);
+      await cloudStorage.setItem('reminders', JSON.stringify(reminders));
       
       // Update state
       setReminders(prev => [...prev, reminder]);
@@ -153,11 +136,9 @@ export const HomePage: FC = () => {
     if (!reminderToDelete) return;
 
     try {
-      if (!isUsingMockData) {
-        // Update cloudStorage if using real data
-        const updatedReminders = reminders.filter(r => r.id !== reminderToDelete.id);
-        await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
-      }
+      // Update cloudStorage
+      const updatedReminders = reminders.filter(r => r.id !== reminderToDelete.id);
+      await cloudStorage.setItem('reminders', JSON.stringify(updatedReminders));
       
       // Update state
       setReminders(prev => prev.filter(r => r.id !== reminderToDelete.id));
