@@ -196,3 +196,88 @@
     color: white;
     stroke-width: 2.5;
 }
+
+.home-page__loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+.home-page__reminders {
+    padding: 16px;
+    display: grid;
+    gap: 16px;
+    margin-bottom: 80px;
+    /* Space for bottom nav */
+}
+
+.reminder-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reminder-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reminder-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reminder-card__text {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.reminder-card__datetime {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    color: #666;
+}
+
+.reminder-card__date,
+.reminder-card__time {
+    display: flex;
+    align-items: center;
+}
+
+.reminder-card__date::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-size: contain;
+}
+
+.reminder-card__time::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
+    background-size: contain;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .reminder-card {
+        background: #1f1f1f;
+    }
+
+    .reminder-card__datetime {
+        color: #999;
+    }
+}

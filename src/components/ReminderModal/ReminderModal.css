@@ -8,6 +8,10 @@
     --background-color: #ffffff;
     --text-color: #1f1f1f;
     --border-color: #e1e1e1;
+    padding: 16px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .reminder-modal__form {

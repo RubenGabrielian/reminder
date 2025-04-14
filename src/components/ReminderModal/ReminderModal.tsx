@@ -1,24 +1,45 @@
 import { FC } from 'react';
 import { Button, Textarea } from '@telegram-apps/telegram-ui';
 import { Modal } from '@/components/Modal/Modal';
+import { cloudStorage } from '@telegram-apps/sdk-react';
 import './ReminderModal.css';
 
 interface ReminderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (reminder: { text: string; date: string; time: string }) => void;
+  onSave: (reminder: { id: string; text: string; date: string; time: string; created: string }) => void;
 }
 
 export const ReminderModal: FC<ReminderModalProps> = ({ isOpen, onClose, onSave }) => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    onSave({
+    const reminderData = {
+      id: Date.now().toString(),
       text: formData.get('text') as string,
       date: formData.get('date') as string,
       time: formData.get('time') as string,
-    });
-    onClose();
+      created: new Date().toISOString()
+    };
+
+    try {
+      // Get existing reminders
+      const existingData = await cloudStorage.getItem('reminders') || '[]';
+      const reminders = JSON.parse(existingData);
+      
+      // Add new reminder
+      reminders.push(reminderData);
+      
+      // Save updated reminders
+      await cloudStorage.setItem('reminders', JSON.stringify(reminders));
+      
+      // Notify parent component
+      onSave(reminderData);
+      onClose();
+    } catch (error) {
+      console.error('Failed to save reminder:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   return (
