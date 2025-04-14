@@ -1,6 +1,12 @@
 .home-page {
+    --text-primary: var(--tg-theme-text-color, #000000);
+    --text-secondary: var(--tg-theme-hint-color, #666666);
+    --background-primary: var(--tg-theme-bg-color, #ffffff);
+    --background-secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
+    --button-color: var(--tg-theme-button-color, #0098ea);
+    --button-text-color: var(--tg-theme-button-text-color, #ffffff);
     min-height: 100vh;
-    background-color: white;
+    background: var(--background-primary);
     padding: 24px 20px;
 }
 
@@ -9,9 +15,9 @@
 }
 
 .home-page__title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text-primary) !important;
+    font-size: 28px;
+    font-weight: 600;
 }
 
 .home-page__empty-state {
@@ -127,16 +133,18 @@
 
 /* Empty State Text */
 .home-page__empty-title {
-    font-size: 24px;
+    color: var(--text-primary);
+    font-size: 20px;
     font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 8px;
+    margin: 24px 0 8px;
+    text-align: center;
 }
 
 .home-page__empty-description {
+    color: var(--text-secondary);
     font-size: 16px;
-    color: #666;
-    max-width: 280px;
+    margin: 0;
+    text-align: center;
 }
 
 /* Bottom Navigation */
@@ -200,7 +208,7 @@
 .home-page__loading {
     text-align: center;
     padding: 24px;
-    color: var(--text-color);
+    color: var(--text-secondary);
     font-size: 16px;
 }
 
@@ -213,7 +221,7 @@
 }
 
 .reminder-card {
-    background: #fff;
+    background: var(--background-secondary);
     border-radius: 16px;
     padding: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -232,17 +240,17 @@
 }
 
 .reminder-card__text {
+    color: var(--text-primary);
     font-size: 16px;
     line-height: 1.5;
-    color: var(--text-color);
     margin: 0;
 }
 
 .reminder-card__datetime {
+    color: var(--text-secondary);
     display: flex;
     gap: 12px;
     font-size: 14px;
-    color: #666;
 }
 
 .reminder-card__date,
@@ -280,4 +288,9 @@
     .reminder-card__datetime {
         color: #999;
     }
+}
+
+/* Update LoadingSpinner text color */
+.loading-spinner__text {
+    color: var(--text-secondary);
 }
